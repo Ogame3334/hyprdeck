@@ -11,5 +11,6 @@ pub fn execute(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
                 Ok(())
             }
         },
+        _ => Ok(()),
     }
 }

@@ -8,4 +8,6 @@ repository = "https://github.com/Ogame3334/hyprdeck"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+clap_complete = "4"
 dirs = "6"
+

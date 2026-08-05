@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use clap_complete::Shell;
 
 #[derive(Parser)]
 #[command(name = "hyprdeck")]
@@ -14,6 +15,9 @@ pub enum Commands {
         #[command(subcommand)]
         command: InputCommands,
     },
+
+    #[command(hide = true)]
+    Completion { shell: Shell },
 }
 
 #[derive(Subcommand)]
