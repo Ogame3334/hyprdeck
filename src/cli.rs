@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{ArgGroup, Args, Parser, Subcommand};
 use clap_complete::Shell;
 
 #[derive(Parser)]
@@ -16,6 +16,11 @@ pub enum Commands {
         commands: TouchpadCommands,
     },
 
+    Volume {
+        #[command(subcommand)]
+        commands: VolumeCommands,
+    },
+
     #[command(hide = true)]
     Completion { shell: Shell },
 }
@@ -29,4 +34,22 @@ pub enum TouchpadCommands {
         #[arg(short, long)]
         verbose: bool,
     },
+}
+
+#[derive(Subcommand)]
+pub enum VolumeCommands {
+    Status(VolumeStatusArgs),
+}
+
+#[derive(Args)]
+#[command(group(
+    ArgGroup::new("format")
+        .multiple(false)
+))]
+pub struct VolumeStatusArgs {
+    #[arg(long)]
+    pub percent: bool,
+
+    #[arg(long)]
+    pub value: bool,
 }
