@@ -18,7 +18,7 @@ pub fn execute_volume(commands: VolumeCommands) -> Result<(), Box<dyn std::error
                 let volume = get_volume(stdout)?;
                 println!("{}%", (volume * 100.0).round());
             } else {
-                println!("{}", stdout);
+                print!("{}", stdout);
             }
         }
     }
