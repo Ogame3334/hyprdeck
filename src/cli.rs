@@ -11,21 +11,13 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    Input {
-        #[command(subcommand)]
-        command: InputCommands,
-    },
-
-    #[command(hide = true)]
-    Completion { shell: Shell },
-}
-
-#[derive(Subcommand)]
-pub enum InputCommands {
     Touchpad {
         #[command(subcommand)]
         commands: TouchpadCommands,
     },
+
+    #[command(hide = true)]
+    Completion { shell: Shell },
 }
 
 #[derive(Subcommand)]
