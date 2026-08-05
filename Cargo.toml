@@ -1,0 +1,11 @@
+[package]
+name = "hyprdeck"
+version = "0.1.0"
+edition = "2021"
+description = "Hyprland control deck"
+license = "MIT"
+repository = "https://github.com/Ogame3334/hyprdeck"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+dirs = "6"

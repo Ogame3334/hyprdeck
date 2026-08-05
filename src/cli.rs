@@ -1,0 +1,36 @@
+use clap::{Parser, Subcommand};
+
+#[derive(Parser)]
+#[command(name = "hyprdeck")]
+#[command(about = "Hyprland control deck")]
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+    Input {
+        #[command(subcommand)]
+        command: InputCommands,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum InputCommands {
+    Touchpad {
+        #[command(subcommand)]
+        commands: TouchpadCommands,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum TouchpadCommands {
+    On,
+    Off,
+    Toggle,
+    Status {
+        #[arg(short, long)]
+        verbose: bool,
+    },
+}

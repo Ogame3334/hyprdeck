@@ -1,0 +1,22 @@
+# Rust build output
+/target/
+
+# Cargo.lock
+# バイナリアプリの場合はコミット推奨なので除外しない
+# /Cargo.lock
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*~
+*.swp
+*.swo
+
+# Environment files
+.env
