@@ -15,6 +15,11 @@ pub fn execute(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
 
+        Commands::Wifi { commands } => {
+            modules::wifi::execute(commands)?;
+            Ok(())
+        }
+
         _ => Ok(()),
     }
 }

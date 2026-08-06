@@ -21,6 +21,11 @@ pub enum Commands {
         commands: AudioCommands,
     },
 
+    Wifi {
+        #[command(subcommand)]
+        commands: WifiCommands,
+    },
+
     #[command(hide = true)]
     Completion { shell: Shell },
 }
@@ -89,4 +94,9 @@ fn parse_volume(s: &str) -> Result<Volume, String> {
     }
 
     Ok(Volume(value))
+}
+
+#[derive(Subcommand)]
+pub enum WifiCommands {
+    Connect,
 }

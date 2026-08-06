@@ -10,4 +10,5 @@ repository = "https://github.com/Ogame3334/hyprdeck"
 clap = { version = "4", features = ["derive"] }
 clap_complete = "4"
 dirs = "6"
+inquire = "0.7"
 
