@@ -16,9 +16,9 @@ pub enum Commands {
         commands: TouchpadCommands,
     },
 
-    Volume {
+    Audio {
         #[command(subcommand)]
-        commands: VolumeCommands,
+        commands: AudioCommands,
     },
 
     #[command(hide = true)]
@@ -37,8 +37,23 @@ pub enum TouchpadCommands {
 }
 
 #[derive(Subcommand)]
+pub enum AudioCommands {
+    Volume {
+        #[command(subcommand)]
+        commands: VolumeCommands,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub struct Volume(pub f32);
+
+#[derive(Subcommand)]
 pub enum VolumeCommands {
     Status(VolumeStatusArgs),
+    Set {
+        #[arg(value_parser = parse_volume)]
+        volume: Volume,
+    },
 }
 
 #[derive(Args)]
@@ -52,4 +67,26 @@ pub struct VolumeStatusArgs {
 
     #[arg(long)]
     pub value: bool,
+}
+
+fn parse_volume(s: &str) -> Result<Volume, String> {
+    if let Some(percent) = s.strip_suffix('%') {
+        let value: f32 = percent
+            .parse()
+            .map_err(|_| "invalid percentage".to_string())?;
+
+        if !(0.0..=100.0).contains(&value) {
+            return Err("percentage must be between 0 and 100".into());
+        }
+
+        return Ok(Volume(value / 100.0));
+    }
+
+    let value: f32 = s.parse().map_err(|_| "invalid volume".to_string())?;
+
+    if !(0.0..=1.0).contains(&value) {
+        return Err("volume must be between 0.0 and 1.0".into());
+    }
+
+    Ok(Volume(value))
 }

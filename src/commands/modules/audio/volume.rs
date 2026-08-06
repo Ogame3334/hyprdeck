@@ -21,6 +21,9 @@ pub fn execute_volume(commands: VolumeCommands) -> Result<(), Box<dyn std::error
                 print!("{}", stdout);
             }
         }
+        VolumeCommands::Set { volume } => {
+            set_volume(volume.0)?;
+        }
     }
 
     Ok(())
@@ -34,4 +37,14 @@ fn get_volume(out: String) -> Result<f32, Box<dyn std::error::Error>> {
         .parse::<f32>()?;
 
     Ok(volume)
+}
+
+fn set_volume(value: f32) -> Result<(), Box<dyn std::error::Error>> {
+    Command::new("wpctl")
+        .args(["set-volume", "@DEFAULT_AUDIO_SINK@", &value.to_string()])
+        .status()?;
+
+    println!("Volume set to: {}", value);
+
+    Ok(())
 }

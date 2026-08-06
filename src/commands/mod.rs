@@ -10,8 +10,8 @@ pub fn execute(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
 
-        Commands::Volume { commands } => {
-            modules::volume::execute_volume(commands)?;
+        Commands::Audio { commands } => {
+            modules::audio::execute(commands)?;
             Ok(())
         }
 
