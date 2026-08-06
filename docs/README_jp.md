@@ -1,4 +1,8 @@
-<h1>hyprdeck <a href="https://github.com/Ogame3334/hyprdeck/blob/main/LICENCE"><img src="https://img.shields.io/badge/license-MIT-4aaa4a"></a><h1>
+<h1>hyprdeck <a href="https://github.com/Ogame3334/hyprdeck/blob/main/LICENCE"><img src="https://img.shields.io/badge/license-MIT-4aaa4a"></a></h1>
+
+[English](https://github.com/Ogame3334/hyprdeck/blob/main/README.md) | 日本語
+
+### Overview
 
 Hyprland の各種設定をコマンドラインから操作するための CLI ツール。
 他の環境での動作は一切保証しない、オレオレ環境ツール。
