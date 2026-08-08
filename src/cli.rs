@@ -26,6 +26,11 @@ pub enum Commands {
         commands: WifiCommands,
     },
 
+    Workspace {
+        #[command(subcommand)]
+        commands: WorkspaceCommands,
+    },
+
     #[command(hide = true)]
     Completion { shell: Shell },
 }
@@ -99,4 +104,10 @@ fn parse_volume(s: &str) -> Result<Volume, String> {
 #[derive(Subcommand)]
 pub enum WifiCommands {
     Connect,
+}
+
+#[derive(Subcommand)]
+pub enum WorkspaceCommands {
+    Move { workspace: String, monitor: String },
+    Status { workspace: Option<String> },
 }

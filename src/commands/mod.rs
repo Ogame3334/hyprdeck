@@ -20,6 +20,11 @@ pub fn execute(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
 
+        Commands::Workspace { commands } => {
+            modules::workspace::execute(commands)?;
+            Ok(())
+        }
+
         _ => Ok(()),
     }
 }
