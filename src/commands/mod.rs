@@ -25,6 +25,11 @@ pub fn execute(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
 
+        Commands::Monitor { commands } => {
+            modules::monitor::execute(commands)?;
+            Ok(())
+        }
+
         _ => Ok(()),
     }
 }

@@ -31,6 +31,11 @@ pub enum Commands {
         commands: WorkspaceCommands,
     },
 
+    Monitor {
+        #[command(subcommand)]
+        commands: MonitorCommands,
+    },
+
     #[command(hide = true)]
     Completion { shell: Shell },
 }
@@ -110,4 +115,11 @@ pub enum WifiCommands {
 pub enum WorkspaceCommands {
     Move { workspace: String, monitor: String },
     Status { workspace: Option<String> },
+}
+
+#[derive(Subcommand)]
+pub enum MonitorCommands {
+    Status,
+    Extend,
+    Mirror,
 }
