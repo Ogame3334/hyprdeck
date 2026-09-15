@@ -189,6 +189,32 @@ pub enum VolumeCommands {
     Set {
         #[arg(value_parser = parse_volume)]
         volume: Volume,
+        #[arg(long, value_name = "ID", default_value = "@DEFAULT_AUDIO_SINK@")]
+        device: String,
+    },
+    Increase {
+        #[arg(value_parser = parse_volume, default_value = "5%")]
+        amount: Volume,
+        #[arg(long, value_name = "ID", default_value = "@DEFAULT_AUDIO_SINK@")]
+        device: String,
+    },
+    Decrease {
+        #[arg(value_parser = parse_volume, default_value = "5%")]
+        amount: Volume,
+        #[arg(long, value_name = "ID", default_value = "@DEFAULT_AUDIO_SINK@")]
+        device: String,
+    },
+    Mute {
+        #[arg(long, value_name = "ID", default_value = "@DEFAULT_AUDIO_SINK@")]
+        device: String,
+    },
+    Unmute {
+        #[arg(long, value_name = "ID", default_value = "@DEFAULT_AUDIO_SINK@")]
+        device: String,
+    },
+    ToggleMute {
+        #[arg(long, value_name = "ID", default_value = "@DEFAULT_AUDIO_SINK@")]
+        device: String,
     },
 }
 
@@ -203,6 +229,12 @@ pub struct VolumeStatusArgs {
 
     #[arg(long)]
     pub value: bool,
+
+    #[arg(long)]
+    pub json: bool,
+
+    #[arg(long, value_name = "ID", default_value = "@DEFAULT_AUDIO_SINK@")]
+    pub device: String,
 }
 
 fn parse_volume(s: &str) -> Result<Volume, String> {
