@@ -45,6 +45,11 @@ pub enum Commands {
         commands: BatteryCommands,
     },
 
+    Metrics {
+        #[command(subcommand)]
+        commands: MetricsCommands,
+    },
+
     #[command(hide = true)]
     Completion { shell: Shell },
 }
@@ -115,6 +120,45 @@ pub struct BatteryStatusArgs {
     /// Print machine-readable JSON.
     #[arg(long)]
     pub json: bool,
+}
+
+#[derive(Subcommand)]
+pub enum MetricsCommands {
+    /// Show a metrics snapshot.
+    Status(MetricsStatusArgs),
+    /// Print metrics repeatedly at a fixed interval.
+    Watch(MetricsWatchArgs),
+}
+
+#[derive(Args, Clone)]
+pub struct MetricsStatusArgs {
+    #[arg(long)]
+    pub cpu: bool,
+    #[arg(long)]
+    pub memory: bool,
+    #[arg(long)]
+    pub storage: bool,
+    #[arg(long)]
+    pub network: bool,
+    #[arg(long)]
+    pub temperature: bool,
+    #[arg(long)]
+    pub short: bool,
+    #[arg(long)]
+    pub verbose: bool,
+    #[arg(long)]
+    pub json: bool,
+    #[arg(long, value_name = "PATH")]
+    pub mount: Option<String>,
+}
+
+#[derive(Args)]
+pub struct MetricsWatchArgs {
+    #[command(flatten)]
+    pub status: MetricsStatusArgs,
+    /// Sampling interval in seconds.
+    #[arg(long, default_value_t = 1.0, value_name = "SECONDS")]
+    pub interval: f64,
 }
 
 #[derive(Subcommand)]

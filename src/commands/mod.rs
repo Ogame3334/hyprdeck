@@ -40,6 +40,11 @@ pub fn execute(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
 
+        Commands::Metrics { commands } => {
+            modules::metrics::execute(commands)?;
+            Ok(())
+        }
+
         _ => Ok(()),
     }
 }
