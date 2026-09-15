@@ -30,6 +30,16 @@ pub fn execute(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
 
+        Commands::Screenshot(args) => {
+            modules::screenshot::execute(args)?;
+            Ok(())
+        }
+
+        Commands::Battery { commands } => {
+            modules::battery::execute(commands)?;
+            Ok(())
+        }
+
         _ => Ok(()),
     }
 }

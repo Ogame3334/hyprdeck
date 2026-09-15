@@ -11,6 +11,8 @@ A self-made personal environment tool; no guarantee that it works in other envir
 
 - **Touchpad control** - Touchpad ON/OFF/toggle/status check (via `hyprctl`)
 - **Volume control** - Get/set the volume of the default audio sink (via `wpctl`)
+- **Screenshot capture** - Select a region, capture the desktop/window/monitor, save PNGs and copy them to the Wayland clipboard
+- **Battery status** - Read battery, charging, power, health and AC state directly from Linux sysfs
 - **Shell completion** - Generates completion scripts for bash / zsh / fish / elvish / powershell
 
 ## Requirements
@@ -18,6 +20,9 @@ A self-made personal environment tool; no guarantee that it works in other envir
 - Linux + Hyprland
 - [hyprctl](https://github.com/hyprwm/Hyprland) (bundled with Hyprland)
 - [wpctl](https://github.com/PipeWire/wireplumber) (bundled with WirePlumber)
+- `grim` and `slurp` (required for screenshots)
+- `wl-clipboard` (required only for `screenshot --clipboard`)
+- `hyprpicker` (optional, required for `screenshot --freeze`)
 
 ## Install
 
@@ -68,4 +73,26 @@ hyprdeck completion bash
 hyprdeck completion zsh
 # fish
 hyprdeck completion fish
+```
+
+### Screenshot
+
+```sh
+hyprdeck screenshot
+hyprdeck screenshot --fast
+hyprdeck screenshot --window
+hyprdeck screenshot --monitor DP-1
+hyprdeck screenshot --output ~/Pictures/share.png --clipboard
+hyprdeck screenshot --no-save --clipboard
+hyprdeck screenshot --freeze
+```
+
+### Battery
+
+```sh
+hyprdeck battery status
+hyprdeck battery status --short
+hyprdeck battery status --verbose
+hyprdeck battery status --json
+hyprdeck battery status --battery BAT0
 ```

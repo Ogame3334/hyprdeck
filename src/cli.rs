@@ -1,5 +1,6 @@
 use clap::{ArgGroup, Args, Parser, Subcommand};
 use clap_complete::Shell;
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(name = "hyprdeck")]
@@ -36,8 +37,84 @@ pub enum Commands {
         commands: MonitorCommands,
     },
 
+    /// Capture a PNG screenshot from the Hyprland session.
+    Screenshot(ScreenshotArgs),
+
+    Battery {
+        #[command(subcommand)]
+        commands: BatteryCommands,
+    },
+
     #[command(hide = true)]
     Completion { shell: Shell },
+}
+
+#[derive(Args)]
+#[command(
+    group(ArgGroup::new("target").args(["fast", "window", "monitor"]).multiple(false)),
+    group(ArgGroup::new("destination").args(["output", "no_save"]).multiple(false))
+)]
+pub struct ScreenshotArgs {
+    /// Capture the whole visible desktop without showing a selection UI.
+    #[arg(long)]
+    pub fast: bool,
+
+    /// Capture the currently focused window.
+    #[arg(long)]
+    pub window: bool,
+
+    /// Capture a monitor by name (for example, DP-1).
+    #[arg(long, value_name = "NAME")]
+    pub monitor: Option<String>,
+
+    /// Freeze the desktop while selecting a region (requires hyprpicker).
+    #[arg(long)]
+    pub freeze: bool,
+
+    /// Include the pointer in the screenshot.
+    #[arg(long)]
+    pub cursor: bool,
+
+    /// Copy the PNG to the Wayland clipboard.
+    #[arg(long)]
+    pub clipboard: bool,
+
+    /// Do not save a file. Useful with --clipboard.
+    #[arg(long)]
+    pub no_save: bool,
+
+    /// Exact output file path.
+    #[arg(short, long, value_name = "PATH", conflicts_with = "directory")]
+    pub output: Option<PathBuf>,
+
+    /// Directory for generated screenshots.
+    #[arg(short = 'd', long, value_name = "DIR")]
+    pub directory: Option<PathBuf>,
+}
+
+#[derive(Subcommand)]
+pub enum BatteryCommands {
+    /// Show battery and AC power information.
+    Status(BatteryStatusArgs),
+}
+
+#[derive(Args)]
+pub struct BatteryStatusArgs {
+    /// Read only this battery (for example, BAT0).
+    #[arg(long, value_name = "NAME")]
+    pub battery: Option<String>,
+
+    /// Include per-battery energy and health details.
+    #[arg(long)]
+    pub verbose: bool,
+
+    /// Print a compact status suitable for status bars.
+    #[arg(long)]
+    pub short: bool,
+
+    /// Print machine-readable JSON.
+    #[arg(long)]
+    pub json: bool,
 }
 
 #[derive(Subcommand)]
