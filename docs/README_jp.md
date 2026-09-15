@@ -13,6 +13,8 @@ Hyprland の各種設定をコマンドラインから操作するための CLI 
 - **音量制御** - デフォルトオーディオシンクの音量取得・設定 (`wpctl` 経由)
 - **スクリーンショット** - 範囲、デスクトップ、ウィンドウ、モニターの撮影、PNG 保存、Wayland クリップボードへのコピー
 - **バッテリー情報** - Linux の sysfs からバッテリー、充電状態、電力、劣化度、AC 接続を取得
+- **システムメトリクス** - Linux の procfs/sysfs から CPU、温度、メモリ、ストレージ、ネットワーク使用量を取得
+- **Wi-Fi 制御** - 対話的な接続、デバイス・周辺ネットワーク確認、保存済み接続管理、Wi-Fi の有効化・切断 (`NetworkManager` 経由)
 - **シェル補完** - bash / zsh / fish / elvish / powershell 用の補完スクリプト生成
 
 ## Requirements
@@ -23,6 +25,7 @@ Hyprland の各種設定をコマンドラインから操作するための CLI 
 - `grim` と `slurp` (スクリーンショットに必須)
 - `wl-clipboard` (`screenshot --clipboard` に必須)
 - `hyprpicker` (`screenshot --freeze` に必須)
+- `nmcli` (Wi-Fi 機能に必須、NetworkManager に同梱)
 
 ## Install
 
@@ -62,6 +65,18 @@ hyprdeck audio volume status --value
 # 音量を設定 (パーセントまたは 0.0〜1.0)
 hyprdeck audio volume set 50%
 hyprdeck audio volume set 0.8
+
+# デフォルト出力を 5% 増減 (任意の値も指定可能)
+hyprdeck audio volume increase
+hyprdeck audio volume decrease 10%
+
+# ミュート操作
+hyprdeck audio volume mute
+hyprdeck audio volume unmute
+hyprdeck audio volume toggle-mute
+
+# 別の PipeWire ノードを確認し、JSON で出力
+hyprdeck audio volume status --device alsa_output.pci-0000_00_1f.3.analog-stereo --json
 ```
 
 ### Shell completion
@@ -95,4 +110,30 @@ hyprdeck battery status --short
 hyprdeck battery status --verbose
 hyprdeck battery status --json
 hyprdeck battery status --battery BAT0
+```
+
+### システムメトリクス
+
+```sh
+hyprdeck metrics status
+hyprdeck metrics status --cpu --memory
+hyprdeck metrics status --json
+hyprdeck metrics status --short
+hyprdeck metrics status --storage --mount /
+hyprdeck metrics watch --interval 2
+```
+
+### Wi-Fi
+
+```sh
+hyprdeck wifi connect
+hyprdeck wifi status
+hyprdeck wifi status --json
+hyprdeck wifi scan --rescan
+hyprdeck wifi scan --json
+hyprdeck wifi saved
+hyprdeck wifi disconnect
+hyprdeck wifi disconnect wlan0
+hyprdeck wifi on
+hyprdeck wifi off
 ```

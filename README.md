@@ -13,6 +13,8 @@ A self-made personal environment tool; no guarantee that it works in other envir
 - **Volume control** - Get/set the volume of the default audio sink (via `wpctl`)
 - **Screenshot capture** - Select a region, capture the desktop/window/monitor, save PNGs and copy them to the Wayland clipboard
 - **Battery status** - Read battery, charging, power, health and AC state directly from Linux sysfs
+- **System metrics** - Show CPU, temperature, memory, storage and network usage from Linux procfs/sysfs
+- **Wi-Fi control** - Connect interactively, inspect devices and nearby networks, manage saved connections, and toggle/disconnect Wi-Fi through NetworkManager
 - **Shell completion** - Generates completion scripts for bash / zsh / fish / elvish / powershell
 
 ## Requirements
@@ -23,6 +25,7 @@ A self-made personal environment tool; no guarantee that it works in other envir
 - `grim` and `slurp` (required for screenshots)
 - `wl-clipboard` (required only for `screenshot --clipboard`)
 - `hyprpicker` (optional, required for `screenshot --freeze`)
+- `nmcli` (required for Wi-Fi commands; provided by NetworkManager)
 
 ## Install
 
@@ -62,6 +65,18 @@ hyprdeck audio volume status --value
 # Set the volume (percentage or 0.0-1.0)
 hyprdeck audio volume set 50%
 hyprdeck audio volume set 0.8
+
+# Increase/decrease the default output by 5% (or a specified amount)
+hyprdeck audio volume increase
+hyprdeck audio volume decrease 10%
+
+# Mute controls
+hyprdeck audio volume mute
+hyprdeck audio volume unmute
+hyprdeck audio volume toggle-mute
+
+# Inspect another PipeWire node and get machine-readable output
+hyprdeck audio volume status --device alsa_output.pci-0000_00_1f.3.analog-stereo --json
 ```
 
 ### Shell completion
@@ -95,4 +110,30 @@ hyprdeck battery status --short
 hyprdeck battery status --verbose
 hyprdeck battery status --json
 hyprdeck battery status --battery BAT0
+```
+
+### System metrics
+
+```sh
+hyprdeck metrics status
+hyprdeck metrics status --cpu --memory
+hyprdeck metrics status --json
+hyprdeck metrics status --short
+hyprdeck metrics status --storage --mount /
+hyprdeck metrics watch --interval 2
+```
+
+### Wi-Fi
+
+```sh
+hyprdeck wifi connect
+hyprdeck wifi status
+hyprdeck wifi status --json
+hyprdeck wifi scan --rescan
+hyprdeck wifi scan --json
+hyprdeck wifi saved
+hyprdeck wifi disconnect
+hyprdeck wifi disconnect wlan0
+hyprdeck wifi on
+hyprdeck wifi off
 ```
