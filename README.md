@@ -15,6 +15,7 @@ A self-made personal environment tool; no guarantee that it works in other envir
 - **Battery status** - Read battery, charging, power, health and AC state directly from Linux sysfs
 - **System metrics** - Show CPU, temperature, memory, storage and network usage from Linux procfs/sysfs
 - **Wi-Fi control** - Connect interactively, inspect devices and nearby networks, manage saved connections, and toggle/disconnect Wi-Fi through NetworkManager
+- **Clipboard control** - Copy, paste, inspect MIME types, and clear Wayland clipboard contents
 - **Shell completion** - Generates completion scripts for bash / zsh / fish / elvish / powershell
 
 ## Requirements
@@ -137,3 +138,19 @@ hyprdeck wifi disconnect wlan0
 hyprdeck wifi on
 hyprdeck wifi off
 ```
+
+### Clipboard
+
+Clipboard commands read and write standard input/output, so they work with text and binary data.
+
+```sh
+printf 'hello' | hyprdeck clipboard copy
+hyprdeck clipboard paste --no-newline
+hyprdeck clipboard show
+hyprdeck clipboard types
+hyprdeck clipboard clear
+cat image.png | hyprdeck clipboard copy --mime-type image/png
+hyprdeck clipboard paste --mime-type image/png > image.png
+```
+
+`clipboard show` displays text contents. If the clipboard only contains binary data, it prints the available MIME types instead of writing binary bytes to the terminal.

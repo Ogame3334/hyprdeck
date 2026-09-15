@@ -1,5 +1,6 @@
 pub mod audio;
 pub mod battery;
+pub mod clipboard;
 pub mod monitor;
 pub mod metrics;
 pub mod screenshot;

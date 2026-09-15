@@ -45,6 +45,11 @@ pub fn execute(command: Commands) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
 
+        Commands::Clipboard { commands } => {
+            modules::clipboard::execute(commands)?;
+            Ok(())
+        }
+
         _ => Ok(()),
     }
 }

@@ -15,6 +15,7 @@ Hyprland の各種設定をコマンドラインから操作するための CLI 
 - **バッテリー情報** - Linux の sysfs からバッテリー、充電状態、電力、劣化度、AC 接続を取得
 - **システムメトリクス** - Linux の procfs/sysfs から CPU、温度、メモリ、ストレージ、ネットワーク使用量を取得
 - **Wi-Fi 制御** - 対話的な接続、デバイス・周辺ネットワーク確認、保存済み接続管理、Wi-Fi の有効化・切断 (`NetworkManager` 経由)
+- **クリップボード制御** - Wayland クリップボードへのコピー、貼り付け、MIME type 確認、消去
 - **シェル補完** - bash / zsh / fish / elvish / powershell 用の補完スクリプト生成
 
 ## Requirements
@@ -137,3 +138,19 @@ hyprdeck wifi disconnect wlan0
 hyprdeck wifi on
 hyprdeck wifi off
 ```
+
+### クリップボード
+
+標準入力・標準出力を使うため、テキストとバイナリの両方を扱えます。
+
+```sh
+printf 'hello' | hyprdeck clipboard copy
+hyprdeck clipboard paste --no-newline
+hyprdeck clipboard show
+hyprdeck clipboard types
+hyprdeck clipboard clear
+cat image.png | hyprdeck clipboard copy --mime-type image/png
+hyprdeck clipboard paste --mime-type image/png > image.png
+```
+
+`clipboard show` はテキストの内容を表示します。バイナリだけの場合は端末へバイナリを出力せず、利用可能な MIME type を表示します。

@@ -50,6 +50,11 @@ pub enum Commands {
         commands: MetricsCommands,
     },
 
+    Clipboard {
+        #[command(subcommand)]
+        commands: ClipboardCommands,
+    },
+
     #[command(hide = true)]
     Completion { shell: Shell },
 }
@@ -159,6 +164,45 @@ pub struct MetricsWatchArgs {
     /// Sampling interval in seconds.
     #[arg(long, default_value_t = 1.0, value_name = "SECONDS")]
     pub interval: f64,
+}
+
+#[derive(Subcommand)]
+pub enum ClipboardCommands {
+    /// Copy bytes from stdin into the Wayland clipboard.
+    Copy {
+        #[arg(long, value_name = "MIME")]
+        mime_type: Option<String>,
+        #[arg(long)]
+        primary: bool,
+        #[arg(long)]
+        sensitive: bool,
+    },
+    /// Write the current clipboard contents to stdout.
+    Paste {
+        #[arg(long, value_name = "MIME")]
+        mime_type: Option<String>,
+        #[arg(long)]
+        primary: bool,
+        #[arg(long)]
+        no_newline: bool,
+    },
+    /// Display text clipboard contents in the terminal.
+    Show {
+        #[arg(long)]
+        primary: bool,
+        #[arg(long)]
+        no_newline: bool,
+    },
+    /// List MIME types currently offered by the clipboard.
+    Types {
+        #[arg(long)]
+        primary: bool,
+    },
+    /// Clear the clipboard.
+    Clear {
+        #[arg(long)]
+        primary: bool,
+    },
 }
 
 #[derive(Subcommand)]
