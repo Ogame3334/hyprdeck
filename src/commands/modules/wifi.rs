@@ -1,6 +1,7 @@
 use crate::cli::WifiCommands;
 
 use inquire::{Password, Select};
+use serde::Serialize;
 
 use std::{collections::BTreeSet, process::Command};
 
@@ -92,9 +93,212 @@ pub fn execute(command: WifiCommands) -> Result<(), Box<dyn std::error::Error>> 
         WifiCommands::Connect => {
             connect()?;
         }
+        WifiCommands::Status { json } => status(json)?,
+        WifiCommands::Scan { rescan, json } => scan(rescan, json)?,
+        WifiCommands::Saved { json } => saved(json)?,
+        WifiCommands::Disconnect { device } => disconnect(device.as_deref())?,
+        WifiCommands::On => radio(true)?,
+        WifiCommands::Off => radio(false)?,
     }
 
     Ok(())
+}
+
+#[derive(Debug, Serialize)]
+struct DeviceStatus {
+    device: String,
+    kind: String,
+    state: String,
+    connection: String,
+}
+
+#[derive(Debug, Serialize)]
+struct NetworkEntry {
+    ssid: String,
+    bssid: String,
+    signal: Option<u32>,
+    security: String,
+    channel: Option<u32>,
+    band: String,
+    in_use: bool,
+}
+
+#[derive(Debug, Serialize)]
+struct SavedConnection {
+    name: String,
+    uuid: String,
+    kind: String,
+    device: String,
+}
+
+fn status(json: bool) -> Result<(), Box<dyn std::error::Error>> {
+    let output = nmcli(&[
+        "-t",
+        "-e",
+        "yes",
+        "-f",
+        "DEVICE,TYPE,STATE,CONNECTION",
+        "device",
+        "status",
+    ])?;
+    let devices: Vec<DeviceStatus> = output
+        .lines()
+        .filter_map(|line| {
+            let fields = split_nmcli_line(line);
+            (fields.len() >= 4).then(|| DeviceStatus {
+                device: fields[0].clone(),
+                kind: fields[1].clone(),
+                state: fields[2].clone(),
+                connection: fields[3].clone(),
+            })
+        })
+        .collect();
+    if json {
+        println!("{}", serde_json::to_string_pretty(&devices)?);
+    } else {
+        for device in devices {
+            println!(
+                "{}: {} ({}, {})",
+                device.device, device.state, device.kind, device.connection
+            );
+        }
+    }
+    Ok(())
+}
+
+fn scan(rescan: bool, json: bool) -> Result<(), Box<dyn std::error::Error>> {
+    if rescan {
+        nmcli(&["device", "wifi", "rescan"])?;
+    }
+    let output = nmcli(&[
+        "-t",
+        "-e",
+        "yes",
+        "-f",
+        "IN-USE,SSID,BSSID,SIGNAL,SECURITY,CHAN,BAND",
+        "device",
+        "wifi",
+        "list",
+    ])?;
+    let entries: Vec<NetworkEntry> = output.lines().filter_map(parse_network_entry).collect();
+    if json {
+        println!("{}", serde_json::to_string_pretty(&entries)?);
+    } else {
+        for entry in entries {
+            println!(
+                "{} {}% {} {} {}",
+                if entry.in_use { "*" } else { " " },
+                entry.signal.unwrap_or(0),
+                entry.ssid,
+                entry.band,
+                entry.security
+            );
+        }
+    }
+    Ok(())
+}
+
+fn saved(json: bool) -> Result<(), Box<dyn std::error::Error>> {
+    let output = nmcli(&[
+        "-t",
+        "-e",
+        "yes",
+        "-f",
+        "NAME,UUID,TYPE,DEVICE",
+        "connection",
+        "show",
+    ])?;
+    let entries: Vec<SavedConnection> = output
+        .lines()
+        .filter_map(|line| {
+            let fields = split_nmcli_line(line);
+            (fields.len() >= 4).then(|| SavedConnection {
+                name: fields[0].clone(),
+                uuid: fields[1].clone(),
+                kind: fields[2].clone(),
+                device: fields[3].clone(),
+            })
+        })
+        .collect();
+    if json {
+        println!("{}", serde_json::to_string_pretty(&entries)?);
+    } else {
+        for entry in entries {
+            println!(
+                "{} ({}, {}) [{}]",
+                entry.name, entry.kind, entry.device, entry.uuid
+            );
+        }
+    }
+    Ok(())
+}
+
+fn disconnect(device: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
+    let device = match device {
+        Some(device) => device.to_owned(),
+        None => active_wifi_device()?.ok_or("no active Wi-Fi device")?,
+    };
+    nmcli(&["device", "disconnect", &device])?;
+    println!("Disconnected: {device}");
+    Ok(())
+}
+
+fn radio(enabled: bool) -> Result<(), Box<dyn std::error::Error>> {
+    nmcli(&["radio", "wifi", if enabled { "on" } else { "off" }])?;
+    println!("Wi-Fi: {}", if enabled { "on" } else { "off" });
+    Ok(())
+}
+
+fn active_wifi_device() -> Result<Option<String>, Box<dyn std::error::Error>> {
+    let output = nmcli(&[
+        "-t",
+        "-e",
+        "yes",
+        "-f",
+        "DEVICE,TYPE,STATE",
+        "device",
+        "status",
+    ])?;
+    Ok(output
+        .lines()
+        .filter_map(|line| {
+            let fields = split_nmcli_line(line);
+            (fields.len() >= 3 && fields[1] == "wifi" && fields[2].starts_with("connected"))
+                .then(|| fields[0].clone())
+        })
+        .next())
+}
+
+fn nmcli(args: &[&str]) -> Result<String, Box<dyn std::error::Error>> {
+    let output = Command::new("nmcli")
+        .args(args)
+        .output()
+        .map_err(|error| format!("nmcli is required: {error}"))?;
+    if !output.status.success() {
+        return Err(format!(
+            "nmcli failed ({}): {}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr).trim()
+        )
+        .into());
+    }
+    Ok(String::from_utf8(output.stdout)?)
+}
+
+fn parse_network_entry(line: &str) -> Option<NetworkEntry> {
+    let fields = split_nmcli_line(line);
+    if fields.len() < 7 {
+        return None;
+    }
+    Some(NetworkEntry {
+        in_use: fields[0] == "*",
+        ssid: fields[1].clone(),
+        bssid: fields[2].clone(),
+        signal: fields[3].parse().ok(),
+        security: fields[4].clone(),
+        channel: fields[5].parse().ok(),
+        band: fields[6].clone(),
+    })
 }
 
 pub fn connect() -> Result<(), Box<dyn std::error::Error>> {
@@ -238,11 +442,7 @@ fn select_access_point(
 }
 
 fn select_ssid() -> Result<String, Box<dyn std::error::Error>> {
-    let output = Command::new("nmcli")
-        .args(["-t", "-f", "SSID", "device", "wifi", "list"])
-        .output()?;
-
-    let stdout = String::from_utf8(output.stdout)?;
+    let stdout = nmcli(&["-t", "-f", "SSID", "device", "wifi", "list"])?;
 
     let ssids: BTreeSet<String> = stdout
         .lines()
@@ -253,6 +453,9 @@ fn select_ssid() -> Result<String, Box<dyn std::error::Error>> {
 
     let ssids: Vec<String> = ssids.into_iter().collect();
 
+    if ssids.is_empty() {
+        return Err("no Wi-Fi networks found".into());
+    }
     let selected = Select::new("Select Wi-Fi", ssids).prompt()?;
 
     Ok(selected)
@@ -279,6 +482,10 @@ fn get_access_points(ssid: &str) -> Result<AccessPoints, Box<dyn std::error::Err
     for line in stdout.lines() {
         let fields = split_nmcli_line(line);
 
+        if fields.len() < 4 {
+            continue;
+        }
+
         if fields[0].trim() != ssid.trim() {
             continue;
         }
@@ -303,10 +510,7 @@ fn remove_existing_connection(ssid: &str) -> Result<(), Box<dyn std::error::Erro
 
     let stdout = String::from_utf8(output.stdout)?;
 
-    let existing = stdout
-        .lines()
-        .map(str::trim)
-        .find(|name| *name == ssid);
+    let existing = stdout.lines().map(str::trim).find(|name| *name == ssid);
 
     if let Some(name) = existing {
         Command::new("sudo")
@@ -338,4 +542,31 @@ fn split_nmcli_line(line: &str) -> Vec<String> {
 
     result.push(current);
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn splits_escaped_nmcli_fields() {
+        assert_eq!(
+            split_nmcli_line("*:Cafe\\:Net:AA\\:BB:80:WPA2"),
+            vec!["*", "Cafe:Net", "AA:BB", "80", "WPA2"]
+        );
+    }
+
+    #[test]
+    fn parses_scan_entry() {
+        let entry = parse_network_entry("*:Cafe\\:Net:AA\\:BB:80:WPA2:36:5 GHz").unwrap();
+        assert!(entry.in_use);
+        assert_eq!(entry.ssid, "Cafe:Net");
+        assert_eq!(entry.signal, Some(80));
+        assert_eq!(entry.channel, Some(36));
+    }
+
+    #[test]
+    fn ignores_malformed_scan_entry() {
+        assert!(parse_network_entry("only:two:fields").is_none());
+    }
 }

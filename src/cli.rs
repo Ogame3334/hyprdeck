@@ -262,6 +262,31 @@ fn parse_volume(s: &str) -> Result<Volume, String> {
 #[derive(Subcommand)]
 pub enum WifiCommands {
     Connect,
+    /// Show the current NetworkManager device state.
+    Status {
+        #[arg(long)]
+        json: bool,
+    },
+    /// Scan and list nearby Wi-Fi access points.
+    Scan {
+        #[arg(long)]
+        rescan: bool,
+        #[arg(long)]
+        json: bool,
+    },
+    /// List saved NetworkManager connections.
+    Saved {
+        #[arg(long)]
+        json: bool,
+    },
+    /// Disconnect a device, or the currently active Wi-Fi device.
+    Disconnect {
+        device: Option<String>,
+    },
+    /// Enable Wi-Fi radio.
+    On,
+    /// Disable Wi-Fi radio.
+    Off,
 }
 
 #[derive(Subcommand)]
